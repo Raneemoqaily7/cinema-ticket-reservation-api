@@ -21,11 +21,12 @@ class Guest (models.Model):
 
 
 class Reservation (models.Model):
-    guest =models.ForeignKey(Guest , related_name="reservation" , on_delete=models.PROTECT )
-    movie = models.ForeignKey(Movie , related_name="reservation", on_delete=models.PROTECT )
-
-
+    guest =models.ForeignKey(Guest  ,related_name="reservation" , on_delete=models.PROTECT )
+    movie = models.ForeignKey(Movie , on_delete=models.PROTECT )
 
 
     def __str__(self):
-        return str (self.movie)
+        return str (self.guest)
+
+
+    

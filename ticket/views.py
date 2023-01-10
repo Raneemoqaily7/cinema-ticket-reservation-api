@@ -1,23 +1,65 @@
+
 from django.shortcuts import render
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-
+from rest_framework import generics 
 from .models import Movie ,Guest,Reservation
-from ticket.api.serializers import GuestSerialzer 
+from ticket.api.serializers import GuestSerialzer ,MovieSerializer ,ReservationSerialzer
+from django.http import HttpResponse
 
-
+#search by id and number (CBV)
+# class GuestListView(generics.ListAPIView):
+#     queryset = Guest.objects.all()
+#     serializer_class = GuestSerialzer
+#     filter_backends = [filters.SearchFilter]
+#     search_fields = ['id', '=number']
 
 # Create your views here.
-#Function Based View 
+#Function Based View
+
+
+# search on movie and guset(FBV)
+@api_view(["GET" ])
+def find_movie(request):
+    movie = Movie.objects.filter(
+        titel =request.data['titel']
+       
+    )
+    serializer = MovieSerializer (movie ,many=True )
+    return Response (serializer.data)
+
+@api_view(["GET" ])
+def find_guest(request):
+    guest = Guest.objects.filter(
+        name =request.data['name']
+       
+    )
+    serializer = GuestSerialzer (guest ,many=True )
+    return Response (serializer.data)
+
+
+
 @api_view(["GET" ,"POST"])
 
+
+
 def FBV_List (request):
+
+
+    
     if request.method =="GET":
         guest  = Guest.objects.all()
-        serializer = GuestSerialzer (guest , many =True )
-        return Response (serializer.data)
+        serializer = GuestSerialzer (guest ,many=True)
+     
+        
 
+        return Response (serializer.data ,status = status.HTTP_200_OK)
+
+
+
+    
+    
 
     elif request.method =="POST":
         serializer = GuestSerialzer(data =request.data)
@@ -28,10 +70,77 @@ def FBV_List (request):
         return Response (serializer.data  ,status= status.HTTP_404_NOT_FOUND)
     
 
+@api_view(["GET" ,"PUT" ,"DELETE"])
 
+def FBV_id (request , name): #get one oobject by name or (id) 
+    guest = Guest.objects.get (name = name)
+    if request.method == "GET" :
+        
+        serializer = GuestSerialzer (guest )
+        return Response (serializer.data)
+    
 
+    if request.method == "PUT":
+        serializer = GuestSerialzer(guest ,data = request.data  )
+        if serializer.is_valid ():
+            serializer.save()
+            return Response (serializer.data  )
+        
+    if request.method == "DELETE":
+        guest.delete()
+        return Response (status.HTTP_204_NO_CONTENT)
 
-
-
+    
+    
         
 
+
+
+@api_view(["POST"])
+    
+def new_reversation (request):
+    if request.method == "POST":
+      movie = Movie.objects.get(
+        titel =request.data['titel'],
+        hall=request.data["hall"]
+      
+       
+    )
+      
+      
+      guest = Guest()
+      guest.name = request.data["name"]
+      guest.number= request.data["number"]
+      guest.save()
+
+      reservtion = Reservation()
+      reservtion.guest = guest
+
+      reservtion.movie = movie
+      reservtion.save()
+
+ 
+    #   serializer = ReservationSerialzer(data=request.data)
+      
+
+
+      return HttpResponse("ok")
+            # return Response(serializer.data , status = status.HTTP_200_OK)
+    #   return Response(serializer.data , status = status.HTTP_404_NOT_FOUND)
+        
+
+@api_view(["GET" ])
+
+
+
+def FBV_reserv (request):
+    
+
+    
+    if request.method =="GET":
+        reservation = Reservation.objects.all()
+        serializer = ReservationSerialzer (reservation , many =True )
+     
+        
+
+        return Response (serializer.data ,status = status.HTTP_200_OK)
