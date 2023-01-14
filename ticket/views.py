@@ -4,9 +4,12 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import generics 
-from .models import Movie ,Guest,Reservation
-from ticket.api.serializers import GuestSerialzer ,MovieSerializer ,ReservationSerialzer
+from .models import Movie ,Guest,Reservation ,Review
+from ticket.api.serializers import GuestSerialzer ,MovieSerializer ,ReservationSerialzer,ReviewSerilaizer
 from django.http import HttpResponse
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import permission_classes
+from ticket.api.permissions import  IsOwnerOrReadOnly ,OwnerOnly 
 
 #search by id and number (CBV)
 # class GuestListView(generics.ListAPIView):
@@ -41,7 +44,7 @@ def find_guest(request):
 
 
 @api_view(["GET" ,"POST"])
-
+# @permission_classes((IsOwnerOrReadOnly, ))
 
 
 def FBV_List (request):
@@ -144,3 +147,35 @@ def FBV_reserv (request):
         
 
         return Response (serializer.data ,status = status.HTTP_200_OK)
+
+
+
+
+
+@api_view (["GET" ,"POST" ,"PUT" ,"DELETE"])
+@permission_classes((OwnerOnly ,))
+
+def reviews (request):
+    if request.method == "GET":
+        review =Review.objects.all() 
+        serializer = ReviewSerilaizer (review ,many=True)
+        return Response(serializer.data)
+
+    elif request.method =="POST":
+        serializer = ReviewSerilaizer (data =request.data)
+        if serializer.is_valid ():
+            serializer.save()
+
+            return Response(serializer.data , status=status.HTTP_201_CREATED)
+        return Response (serializer.data  ,status= status.HTTP_404_NOT_FOUND)
+        
+    
+    elif request.method == "PUT":
+       
+        serializer =ReviewSerilaizer(data = request.data  )
+        if serializer.is_valid ():
+            serializer.save()
+            return HttpResponse("ok")
+        
+
+   
