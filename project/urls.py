@@ -21,7 +21,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('ticket.urls')),
     path('api-auth/', include('rest_framework.urls')),
-    path('api-token-auth/', views.obtain_auth_token, name='api-token-auth'),
+    path('api-token-auth/', views.obtain_auth_token, name='api-token-auth'), #post method 
     
 
     

@@ -6,15 +6,23 @@ from rest_framework import status
 from rest_framework import generics 
 from .models import Movie ,Guest,Reservation ,Review
 from ticket.api.serializers import GuestSerialzer ,MovieSerializer ,ReservationSerialzer,ReviewSerilaizer
-from django.http import HttpResponse
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.decorators import permission_classes
 from ticket.api.permissions import  IsOwnerOrReadOnly ,OwnerOnly 
+from django.http import HttpResponse
+
+from rest_framework.decorators import authentication_classes ,permission_classes
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
+
+
+
+
 
 #search by id and number (CBV)
 # class GuestListView(generics.ListAPIView):
 #     queryset = Guest.objects.all()
 #     serializer_class = GuestSerialzer
+#     authentication_classes=[TokenAuthentication]
+#     permission_classes = [IsAuthenticated]
 #     filter_backends = [filters.SearchFilter]
 #     search_fields = ['id', '=number']
 
@@ -153,9 +161,10 @@ def FBV_reserv (request):
 
 
 @api_view (["GET" ,"POST" ,"PUT" ,"DELETE"])
-@permission_classes((OwnerOnly ,))
+@authentication_classes(( TokenAuthentication,))
+@permission_classes((IsOwnerOrReadOnly, ))
 
-def reviews (request):
+def reviews (request , id ):
     if request.method == "GET":
         review =Review.objects.all() 
         serializer = ReviewSerilaizer (review ,many=True)
@@ -171,8 +180,8 @@ def reviews (request):
         
     
     elif request.method == "PUT":
-       
-        serializer =ReviewSerilaizer(data = request.data  )
+        review = Review.objects.get (id = id )
+        serializer =ReviewSerilaizer(review ,data = request.data  )
         if serializer.is_valid ():
             serializer.save()
             return HttpResponse("ok")
