@@ -78,13 +78,13 @@ def FBV_List (request):
             serializer.save()
             return Response (serializer.data , status = status.HTTP_201_CREATED )
         
-        return Response (serializer.data  ,status= status.HTTP_404_NOT_FOUND)
+        return Response (serializer.errors ,status= status.HTTP_404_NOT_FOUND)
     
 
 @api_view(["GET" ,"PUT" ,"DELETE"])
 
-def FBV_id (request , name): #get one oobject by name or (id) 
-    guest = Guest.objects.get (name = name)
+def FBV_id (request , id): #get one oobject by name or (id) 
+    guest = Guest.objects.get (id = id)
     if request.method == "GET" :
         
         serializer = GuestSerialzer (guest )
@@ -93,13 +93,20 @@ def FBV_id (request , name): #get one oobject by name or (id)
 
     if request.method == "PUT":
         serializer = GuestSerialzer(guest ,data = request.data  )
+        response ={}
         if serializer.is_valid ():
             serializer.save()
-            return Response (serializer.data  )
+            response=serializer.data
+            return Response (data=response)
+        return Response ( serializer.errors ,status=status.HTTP_400_BAD_REQUEST )
         
     if request.method == "DELETE":
-        guest.delete()
-        return Response (status.HTTP_204_NO_CONTENT)
+        operation = guest.delete()
+        if operation :
+            data = "delete successful"
+        else :
+            data = "delete failur"
+        return Response (data = data ,status = status.HTTP_204_NO_CONTENT)
 
     
     
@@ -130,12 +137,16 @@ def new_reversation (request):
       reservtion.movie = movie
       reservtion.save()
 
- 
-    #   serializer = ReservationSerialzer(data=request.data)
+      data ={}
+      serializer = ReservationSerialzer(data=request.data)
+      if serializer.is_valid():
+          serializer.save()     
+          data  =serializer.data
+          return Response (data =data )
+      return Response (serializer.errors)
+
+
       
-
-
-      return HttpResponse("ok")
             # return Response(serializer.data , status = status.HTTP_200_OK)
     #   return Response(serializer.data , status = status.HTTP_404_NOT_FOUND)
         
@@ -150,6 +161,9 @@ def FBV_reserv (request):
     
     if request.method =="GET":
         reservation = Reservation.objects.all()
+        guest = Guest()
+        movie=Movie()
+        
         serializer = ReservationSerialzer (reservation , many =True )
      
         
@@ -183,8 +197,11 @@ def reviews (request , id ):
         review = Review.objects.get (id = id )
         serializer =ReviewSerilaizer(review ,data = request.data  )
         if serializer.is_valid ():
+            data = {}
             serializer.save()
-            return HttpResponse("ok")
+            data = serializer.data
+            return Response (data = data)
+        return Response (serializer.errors , status = status.HTTP_400_BAD_REQUEST)
         
 
    
