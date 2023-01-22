@@ -122,7 +122,6 @@ def new_reversation (request):
         titel =request.data['titel'],
         hall=request.data["hall"]
       
-       
     )
       
       
@@ -135,6 +134,7 @@ def new_reversation (request):
       reservtion.guest = guest
 
       reservtion.movie = movie
+      reservtion.movie_name =movie
       reservtion.save()
 
       data ={}
@@ -147,13 +147,9 @@ def new_reversation (request):
 
 
       
-            # return Response(serializer.data , status = status.HTTP_200_OK)
-    #   return Response(serializer.data , status = status.HTTP_404_NOT_FOUND)
-        
+
 
 @api_view(["GET" ])
-
-
 
 def FBV_reserv (request):
     
@@ -161,8 +157,6 @@ def FBV_reserv (request):
     
     if request.method =="GET":
         reservation = Reservation.objects.all()
-        guest = Guest()
-        movie=Movie()
         
         serializer = ReservationSerialzer (reservation , many =True )
      
@@ -175,13 +169,13 @@ def FBV_reserv (request):
 
 
 @api_view (["GET" ,"POST" ,"PUT" ,"DELETE"])
-@authentication_classes(( TokenAuthentication,))
-@permission_classes((IsOwnerOrReadOnly, ))
+@authentication_classes((TokenAuthentication,))
+@permission_classes(( OwnerOnly,IsAuthenticated))
 
 def reviews (request , id ):
     if request.method == "GET":
-        review =Review.objects.all() 
-        serializer = ReviewSerilaizer (review ,many=True)
+        review =Review.objects.get (id=id)
+        serializer = ReviewSerilaizer (review )
         return Response(serializer.data)
 
     elif request.method =="POST":

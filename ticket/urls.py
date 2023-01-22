@@ -11,10 +11,10 @@ urlpatterns = [
     path('guest-find/', views.find_guest),
     path('new-reserv/', views.new_reversation),
     path('reserv/', views.FBV_reserv),
-    path('reviews/', views.reviews),
+    path('reviews', views.reviews),
     path('reviews/<int:id>/', views.reviews),
 
-    # path ('guest' ,GuestListView.as_view() )   #test
+    # path ('guest/' ,GuestListView.as_view() )   #test
 
    
 ]

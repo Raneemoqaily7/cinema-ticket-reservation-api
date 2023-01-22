@@ -4,6 +4,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver 
 from django.conf import settings 
 from rest_framework.authtoken.models import Token
+from django.contrib.auth.models import User
 # Create your models here.
 
 class Movie (models.Model):
@@ -26,6 +27,7 @@ class Guest (models.Model):
 
 class Reservation (models.Model):
     guest =models.CharField(max_length=30)
+    movie_name = models.CharField(max_length=30 )
     movie = models.ForeignKey(Movie , on_delete=models.PROTECT )
 
 
@@ -35,13 +37,13 @@ class Reservation (models.Model):
 
 class Review(models.Model):
     title = models.CharField(max_length=20)
-    reviewer = models.ForeignKey(get_user_model() ,on_delete=models.CASCADE )
+    author = models.ForeignKey(User,on_delete=models.CASCADE )
     time_created =models.TimeField(auto_now_add=True)
     content = models.TextField()
 
 
     def __str__(self):
-        return str(self.reviewer)
+        return str(self.author)
     
 
 @receiver(post_save , sender =settings.AUTH_USER_MODEL)
